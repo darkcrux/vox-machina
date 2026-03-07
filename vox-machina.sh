@@ -51,7 +51,35 @@ audio_play() {
 
 # --- Commands ---
 
+cmd_mute() {
+  config_set muted "true"
+  echo "vox-machina muted."
+}
+
+cmd_unmute() {
+  config_set muted ""
+  echo "vox-machina unmuted."
+}
+
+cmd_status() {
+  local active muted
+  active=$(config_get active_voice)
+  muted=$(config_get muted)
+
+  echo "Voice:  ${active:-<none>}"
+  if [[ "$muted" == "true" ]]; then
+    echo "Status: muted"
+  else
+    echo "Status: active"
+  fi
+}
+
 cmd_play() {
+  # Silently exit if muted
+  local muted
+  muted=$(config_get muted)
+  [[ "$muted" == "true" ]] && exit 0
+
   local hook="${1:-Stop}"
   local voice
   voice=$(config_get active_voice)
@@ -276,6 +304,9 @@ Commands:
   use <voice>            Set the active voice pack
   list                   List installed voice packs
   play <hook>            Play a random clip for a hook (SessionStart, Stop, Notification, PostToolUseFailure)
+  mute                   Silence all voice playback
+  unmute                 Re-enable voice playback
+  status                 Show current voice and mute state
   hooks install          Add vox-machina hooks to Claude Code settings
   hooks uninstall        Remove vox-machina hooks from Claude Code settings
   help                   Show this help message
@@ -305,6 +336,9 @@ case "${1:-help}" in
   play)       cmd_play "${2:-}" ;;
   use)        cmd_use "${2:-}" ;;
   list)       cmd_list ;;
+  mute)       cmd_mute ;;
+  unmute)     cmd_unmute ;;
+  status)     cmd_status ;;
   install)
     if [[ "${2:-}" == "hooks" ]] || [[ "${2:-}" == "" && "${1:-}" == "hooks" ]]; then
       shift; cmd_hooks_install

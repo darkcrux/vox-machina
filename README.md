@@ -50,6 +50,9 @@ vox-machina uninstall <voice>      Remove a voice pack
 vox-machina use <voice>            Set the active voice
 vox-machina list                   List installed voice packs
 vox-machina play <hook>            Play a random clip for a hook
+vox-machina mute                   Silence all voice playback
+vox-machina unmute                 Re-enable voice playback
+vox-machina status                 Show current voice and mute state
 vox-machina hooks install          Add hooks to Claude Code settings
 vox-machina hooks uninstall        Remove hooks from Claude Code settings
 ```
