@@ -40,12 +40,14 @@ vox-machina play Stop         # Test it. You've earned it.
 |------|------|
 | `glados` | Passive-aggressive AI from Portal. Will question your life choices. |
 | `overmind` | Zerg Swarm commander from StarCraft. You are the cerebrate now. |
+| `wheatley` | Bumbling personality core from Portal 2. Sixty percent ready. |
 
 Switch anytime:
 
 ```bash
 vox-machina use overmind      # For the Swarm
 vox-machina use glados        # For science
+vox-machina use wheatley      # For chaos
 ```
 
 ## Too much? Too little?
