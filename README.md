@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="logo.png" alt="vox-machina logo" width="300">
+</p>
+
 # vox-machina
 
 > *"Voice of the machine"* — because your AI pair programmer should have personality.
