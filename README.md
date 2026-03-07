@@ -1,15 +1,21 @@
 # vox-machina
 
-Playful AI voice packs for [Claude Code](https://claude.com/claude-code) hooks. Get snarky GLaDOS commentary, commanding Overmind directives, or create your own custom voice packs.
+> *"Voice of the machine"* — because your AI pair programmer should have personality.
 
-## What it does
+Your terminal is already talking to you. Might as well make it entertaining.
 
-vox-machina plays random audio clips at key moments in your Claude Code session:
+vox-machina hooks into [Claude Code](https://claude.com/claude-code) and plays random voice clips when things happen — task complete, session start, errors, notifications. Ship with GLaDOS passive-aggressively judging your code, or the Zerg Overmind commanding you to obey the Swarm. Or make your own. We don't judge. (GLaDOS will, though.)
 
-- **SessionStart** — When you begin a conversation
-- **Stop** — When Claude finishes and it's your turn
-- **Notification** — When Claude needs your attention
-- **PostToolUseFailure** — When something goes wrong
+## How it works
+
+Claude Code has [hooks](https://docs.anthropic.com/en/docs/claude-code/hooks) — events that fire at key moments. vox-machina latches onto four of them:
+
+| Hook | When it fires | What you'll hear |
+|------|--------------|------------------|
+| **SessionStart** | You open a session | *"Oh, it's you. It's been a long time."* |
+| **Stop** | Claude finishes, your turn | *"Task complete. Please proceed to the next test chamber."* |
+| **Notification** | Claude needs your attention | *"I hate to interrupt, but actually, no, I love to interrupt."* |
+| **PostToolUseFailure** | Something broke | *"Error detected. I blame you."* |
 
 ## Install
 
@@ -17,126 +23,133 @@ vox-machina plays random audio clips at key moments in your Claude Code session:
 curl -fsSL https://raw.githubusercontent.com/darkcrux/vox-machina/main/install.sh | bash
 ```
 
-This installs the script to `~/.vox-machina/` and symlinks `vox-machina` into `~/.local/bin/`. If `~/.local/bin` isn't in your PATH, the installer will show you how to add it.
+Installs to `~/.vox-machina/` and symlinks into `~/.local/bin/`. If that's not in your PATH, the installer will politely tell you what to do.
 
-## Quick Start
+## Quick start
 
 ```bash
-# Install a voice pack
-vox-machina install glados
-
-# Set it as active
-vox-machina use glados
-
-# Hook into Claude Code
-vox-machina hooks install
-
-# Test it
-vox-machina play Stop
+vox-machina install glados    # Download the GLaDOS voice pack
+vox-machina use glados        # Set it as active
+vox-machina hooks install     # Wire it into Claude Code
+vox-machina play Stop         # Test it. You've earned it.
 ```
 
-## Available Voice Packs
+## Voice packs
 
-| Voice | Description |
-|-------|-------------|
-| `glados` | The passive-aggressive AI from Portal |
-| `overmind` | The commanding Zerg consciousness from StarCraft |
+| Pack | Vibe |
+|------|------|
+| `glados` | Passive-aggressive AI from Portal. Will question your life choices. |
+| `overmind` | Zerg Swarm commander from StarCraft. You are the cerebrate now. |
+
+Switch anytime:
+
+```bash
+vox-machina use overmind      # For the Swarm
+vox-machina use glados        # For science
+```
+
+## Too much? Too little?
+
+```bash
+vox-machina mute              # Silence. Finally.
+vox-machina unmute            # You missed it, didn't you?
+vox-machina status            # Check what's going on
+```
 
 ## Commands
 
 ```
-vox-machina init <name>            Create a voice definition template
+vox-machina init <name>            Scaffold a new voice definition
+vox-machina generate <voice.json>  Generate audio from a voice definition
 vox-machina install <voice|path>   Install a voice pack (from release or local folder)
 vox-machina uninstall <voice>      Remove a voice pack
 vox-machina use <voice>            Set the active voice
 vox-machina list                   List installed voice packs
-vox-machina play <hook>            Play a random clip for a hook
-vox-machina generate <voice.json>  Generate audio from a voice definition
-vox-machina mute                   Silence all voice playback
-vox-machina unmute                 Re-enable voice playback
+vox-machina play <hook>            Play a random clip
+vox-machina mute                   Silence all playback
+vox-machina unmute                 Re-enable playback
 vox-machina status                 Show current voice and mute state
-vox-machina hooks install          Add hooks to Claude Code settings
-vox-machina hooks uninstall        Remove hooks from Claude Code settings
+vox-machina hooks install          Add hooks to Claude Code
+vox-machina hooks uninstall        Remove hooks from Claude Code
 ```
 
-## Create Your Own Voice Pack
+## Make your own voice pack
 
-### Option 1: Generate from a voice definition
+You have two options: generate audio from text, or bring your own files.
+
+### Generate from text
 
 ```bash
-# Create a template
-vox-machina init my-voice
+# Scaffold a template
+vox-machina init jarvis
 
-# Edit my-voice.json with your phrases and TTS settings
-# Then generate the audio files
-vox-machina generate my-voice.json
+# Edit jarvis.json — add your phrases, pick a TTS engine
+# Then generate the audio
+vox-machina generate jarvis.json
 
-# Install the generated voice pack
-vox-machina install ./my-voice
+# Install and activate
+vox-machina install ./jarvis
+vox-machina use jarvis
 ```
 
-#### Supported engines
+The template gives you all four hooks with placeholder phrases. Fill in what you want, delete what you don't — missing hooks are silently skipped.
 
-| Engine | Platform | Settings |
-|--------|----------|----------|
+#### TTS engines
+
+| Engine | Platform | Config |
+|--------|----------|--------|
 | `say` | macOS | `say_voice`, `say_rate` |
 | `espeak` | Linux | `espeak_voice`, `espeak_pitch`, `espeak_speed` |
 | `piper` | Linux | `piper_model` |
 | `glados` | Any | `api_url` (defaults to glados.c-net.org) |
 
-If no engine is specified, it auto-detects: `say` on macOS, `espeak` on Linux.
+Auto-detects `say` on macOS, `espeak` on Linux if you don't specify.
 
-#### Available macOS voices
+**macOS voices worth trying** (run `say -v '?'` for the full list):
 
-Run `say -v '?'` to see all available voices. Some good ones:
+| Voice | Vibe |
+|-------|------|
+| `Daniel` | British. Authoritative. Judges you politely. |
+| `Zarvox` | Robotic alien. Surprisingly good Overmind. |
+| `Whisper` | ASMR for your terminal. |
+| `Fred` | The voice your dad's GPS would have. |
+| `Samantha` | Siri before Siri was Siri. |
 
-| Voice | Style |
-|-------|-------|
-| `Daniel` | British, authoritative |
-| `Samantha` | Default Siri-like |
-| `Fred` | Classic deep male |
-| `Whisper` | Whispery |
-| `Zarvox` | Robotic alien |
+### Bring your own audio
 
-### Option 2: Bring your own audio files
-
-Create a folder with audio files organized by hook event:
+Drop audio files into folders named after hooks:
 
 ```
 my-voice/
 ├── SessionStart/
-│   ├── 01.wav
-│   └── 02.mp3
+│   └── hello-there.mp3
 ├── Stop/
-│   └── something-witty.wav
+│   ├── 01.wav
+│   └── 02.wav
 ├── Notification/
-│   └── hey-listen.mp3
+│   └── hey-listen.wav
 └── PostToolUseFailure/
-    └── oops.wav
+    └── you-died.mp3
 ```
-
-Install it:
 
 ```bash
 vox-machina install ./my-voice
 ```
 
-You only need folders for the hooks you want — missing folders are silently skipped.
+Any format `afplay` (macOS) or your Linux audio player handles works — wav, mp3, aiff, m4a, ogg.
 
-## Platform Support
+## Platform support
 
-| Platform | Audio Player |
-|----------|-------------|
-| macOS | `afplay` (built-in) |
-| Linux | `paplay`, `aplay`, `mpv`, or `ffplay` (first available) |
-
-On Linux, install one of: `pulseaudio-utils`, `alsa-utils`, `mpv`, or `ffmpeg`.
+| Platform | Audio player | Notes |
+|----------|-------------|-------|
+| macOS | `afplay` | Built-in. You're good. |
+| Linux | `paplay` / `aplay` / `mpv` / `ffplay` | First one found wins. Install one of: `pulseaudio-utils`, `alsa-utils`, `mpv`, or `ffmpeg`. |
 
 ## Requirements
 
 - [Claude Code](https://claude.com/claude-code)
 - `bash`, `curl`, `unzip`, `python3`
-- An audio player (see platform support above)
+- Something that plays audio (see above)
 
 ## License
 
