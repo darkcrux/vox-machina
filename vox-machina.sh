@@ -26,17 +26,18 @@ json.dump(c, open(f, 'w'), indent=2)
 
 audio_play() {
   local file="$1"
+  local cmd
   case "$(uname -s)" in
-    Darwin)  afplay "$file" &disown ;;
+    Darwin)  cmd=(afplay "$file") ;;
     Linux)
       if command -v paplay &>/dev/null; then
-        paplay "$file" &disown
+        cmd=(paplay "$file")
       elif command -v aplay &>/dev/null; then
-        aplay -q "$file" &disown
+        cmd=(aplay -q "$file")
       elif command -v mpv &>/dev/null; then
-        mpv --no-terminal "$file" &disown
+        cmd=(mpv --no-terminal "$file")
       elif command -v ffplay &>/dev/null; then
-        ffplay -nodisp -autoexit -loglevel quiet "$file" &disown
+        cmd=(ffplay -nodisp -autoexit -loglevel quiet "$file")
       else
         echo "vox-machina: no audio player found. Install pulseaudio, alsa-utils, mpv, or ffmpeg." >&2
         exit 1
@@ -47,6 +48,7 @@ audio_play() {
       exit 1
       ;;
   esac
+  ("${cmd[@]}" &>/dev/null &)
 }
 
 # --- Commands ---
