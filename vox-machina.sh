@@ -24,6 +24,31 @@ json.dump(c, open(f, 'w'), indent=2)
 "
 }
 
+audio_play() {
+  local file="$1"
+  case "$(uname -s)" in
+    Darwin)  afplay "$file" & ;;
+    Linux)
+      if command -v paplay &>/dev/null; then
+        paplay "$file" &
+      elif command -v aplay &>/dev/null; then
+        aplay -q "$file" &
+      elif command -v mpv &>/dev/null; then
+        mpv --no-terminal "$file" &
+      elif command -v ffplay &>/dev/null; then
+        ffplay -nodisp -autoexit -loglevel quiet "$file" &
+      else
+        echo "vox-machina: no audio player found. Install pulseaudio, alsa-utils, mpv, or ffmpeg." >&2
+        exit 1
+      fi
+      ;;
+    *)
+      echo "vox-machina: unsupported platform $(uname -s)" >&2
+      exit 1
+      ;;
+  esac
+}
+
 # --- Commands ---
 
 cmd_play() {
@@ -57,7 +82,7 @@ cmd_play() {
   fi
 
   local selected="${files[$((RANDOM % ${#files[@]}))]}"
-  afplay "$selected" &
+  audio_play "$selected"
 }
 
 cmd_use() {
@@ -159,7 +184,8 @@ cmd_hooks_install() {
     exit 1
   fi
 
-  local vox_bin="${VOX_HOME}/vox-machina.sh"
+  local vox_bin
+  vox_bin=$(command -v vox-machina 2>/dev/null || echo "${VOX_HOME}/vox-machina.sh")
 
   python3 -c "
 import json
@@ -188,7 +214,7 @@ for event in hook_events:
     event_hooks = hooks.get(event, [])
     # Remove existing vox-machina hooks
     event_hooks = [h for h in event_hooks if not any(
-        vox_bin in hk.get('command', '')
+        'vox-machina' in hk.get('command', '')
         for hk in h.get('hooks', [])
     )]
     event_hooks.append(hook_entry)
@@ -208,13 +234,10 @@ cmd_hooks_uninstall() {
     exit 1
   fi
 
-  local vox_bin="${VOX_HOME}/vox-machina.sh"
-
   python3 -c "
 import json
 
 settings_path = '$CLAUDE_SETTINGS'
-vox_bin = '$vox_bin'
 
 with open(settings_path) as f:
     settings = json.load(f)
@@ -224,7 +247,7 @@ hooks = settings.get('hooks', {})
 for event in list(hooks.keys()):
     event_hooks = hooks[event]
     event_hooks = [h for h in event_hooks if not any(
-        vox_bin in hk.get('command', '')
+        'vox-machina' in hk.get('command', '')
         for hk in h.get('hooks', [])
     )]
     if event_hooks:

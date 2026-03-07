@@ -17,26 +17,22 @@ vox-machina plays random audio clips at key moments in your Claude Code session:
 curl -fsSL https://raw.githubusercontent.com/darkcrux/vox-machina/main/install.sh | bash
 ```
 
-Add to your PATH:
-
-```bash
-export PATH="$HOME/.vox-machina:$PATH"
-```
+This installs the script to `~/.vox-machina/` and symlinks `vox-machina` into `~/.local/bin/`. If `~/.local/bin` isn't in your PATH, the installer will show you how to add it.
 
 ## Quick Start
 
 ```bash
 # Install a voice pack
-vox-machina.sh install glados
+vox-machina install glados
 
 # Set it as active
-vox-machina.sh use glados
+vox-machina use glados
 
 # Hook into Claude Code
-vox-machina.sh hooks install
+vox-machina hooks install
 
 # Test it
-vox-machina.sh play Stop
+vox-machina play Stop
 ```
 
 ## Available Voice Packs
@@ -49,18 +45,18 @@ vox-machina.sh play Stop
 ## Commands
 
 ```
-vox-machina.sh install <voice|path>   Install a voice pack (from release or local folder)
-vox-machina.sh uninstall <voice>      Remove a voice pack
-vox-machina.sh use <voice>            Set the active voice
-vox-machina.sh list                   List installed voice packs
-vox-machina.sh play <hook>            Play a random clip for a hook
-vox-machina.sh hooks install          Add hooks to Claude Code settings
-vox-machina.sh hooks uninstall        Remove hooks from Claude Code settings
+vox-machina install <voice|path>   Install a voice pack (from release or local folder)
+vox-machina uninstall <voice>      Remove a voice pack
+vox-machina use <voice>            Set the active voice
+vox-machina list                   List installed voice packs
+vox-machina play <hook>            Play a random clip for a hook
+vox-machina hooks install          Add hooks to Claude Code settings
+vox-machina hooks uninstall        Remove hooks from Claude Code settings
 ```
 
 ## Create Your Own Voice Pack
 
-Just create a folder with audio files organized by hook event:
+Create a folder with audio files organized by hook event:
 
 ```
 my-voice/
@@ -78,16 +74,25 @@ my-voice/
 Install it:
 
 ```bash
-vox-machina.sh install ./my-voice
+vox-machina install ./my-voice
 ```
 
-Any audio format supported by macOS `afplay` works (wav, mp3, aiff, m4a).
+You only need folders for the hooks you want — missing folders are silently skipped.
+
+## Platform Support
+
+| Platform | Audio Player |
+|----------|-------------|
+| macOS | `afplay` (built-in) |
+| Linux | `paplay`, `aplay`, `mpv`, or `ffplay` (first available) |
+
+On Linux, install one of: `pulseaudio-utils`, `alsa-utils`, `mpv`, or `ffmpeg`.
 
 ## Requirements
 
-- macOS (uses `afplay` for audio playback)
 - [Claude Code](https://claude.com/claude-code)
-- python3 (for config management)
+- `bash`, `curl`, `unzip`, `python3`
+- An audio player (see platform support above)
 
 ## License
 
