@@ -45,11 +45,13 @@ vox-machina play Stop
 ## Commands
 
 ```
+vox-machina init <name>            Create a voice definition template
 vox-machina install <voice|path>   Install a voice pack (from release or local folder)
 vox-machina uninstall <voice>      Remove a voice pack
 vox-machina use <voice>            Set the active voice
 vox-machina list                   List installed voice packs
 vox-machina play <hook>            Play a random clip for a hook
+vox-machina generate <voice.json>  Generate audio from a voice definition
 vox-machina mute                   Silence all voice playback
 vox-machina unmute                 Re-enable voice playback
 vox-machina status                 Show current voice and mute state
@@ -58,6 +60,45 @@ vox-machina hooks uninstall        Remove hooks from Claude Code settings
 ```
 
 ## Create Your Own Voice Pack
+
+### Option 1: Generate from a voice definition
+
+```bash
+# Create a template
+vox-machina init my-voice
+
+# Edit my-voice.json with your phrases and TTS settings
+# Then generate the audio files
+vox-machina generate my-voice.json
+
+# Install the generated voice pack
+vox-machina install ./my-voice
+```
+
+#### Supported engines
+
+| Engine | Platform | Settings |
+|--------|----------|----------|
+| `say` | macOS | `say_voice`, `say_rate` |
+| `espeak` | Linux | `espeak_voice`, `espeak_pitch`, `espeak_speed` |
+| `piper` | Linux | `piper_model` |
+| `glados` | Any | `api_url` (defaults to glados.c-net.org) |
+
+If no engine is specified, it auto-detects: `say` on macOS, `espeak` on Linux.
+
+#### Available macOS voices
+
+Run `say -v '?'` to see all available voices. Some good ones:
+
+| Voice | Style |
+|-------|-------|
+| `Daniel` | British, authoritative |
+| `Samantha` | Default Siri-like |
+| `Fred` | Classic deep male |
+| `Whisper` | Whispery |
+| `Zarvox` | Robotic alien |
+
+### Option 2: Bring your own audio files
 
 Create a folder with audio files organized by hook event:
 

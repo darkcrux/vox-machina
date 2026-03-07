@@ -1,8 +1,5 @@
-# Voice pack audio files (distributed via GitHub Releases)
-voices/*/SessionStart/
-voices/*/Stop/
-voices/*/Notification/
-voices/*/PostToolUseFailure/
+# Voice packs (distributed via GitHub Releases)
+voices/
 
 # macOS
 .DS_Store
