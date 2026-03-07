@@ -26,6 +26,13 @@ json.dump(c, open(f, 'w'), indent=2)
 
 audio_play() {
   local file="$1"
+  local pidfile="$VOX_HOME/.player.pid"
+
+  # Skip if already playing
+  if [[ -f "$pidfile" ]] && kill -0 "$(cat "$pidfile")" 2>/dev/null; then
+    return
+  fi
+
   local cmd
   case "$(uname -s)" in
     Darwin)  cmd=(afplay "$file") ;;
@@ -48,7 +55,9 @@ audio_play() {
       exit 1
       ;;
   esac
-  ("${cmd[@]}" &>/dev/null &)
+  "${cmd[@]}" &>/dev/null &
+  echo $! > "$pidfile"
+  disown
 }
 
 # --- Commands ---
