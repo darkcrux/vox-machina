@@ -134,13 +134,7 @@ cmd_play() {
 
   local audio_dir="${VOICES_DIR}/${voice}/${hook}"
   if [[ ! -d "$audio_dir" ]]; then
-    # Try case-insensitive match (e.g. SessionStart -> session_start)
-    local lower_hook
-    lower_hook=$(echo "$hook" | sed 's/\([A-Z]\)/_\L\1/g' | sed 's/^_//')
-    audio_dir="${VOICES_DIR}/${voice}/${lower_hook}"
-    if [[ ! -d "$audio_dir" ]]; then
-      exit 0
-    fi
+    exit 0
   fi
 
   local files=()
