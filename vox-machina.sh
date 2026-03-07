@@ -27,16 +27,16 @@ json.dump(c, open(f, 'w'), indent=2)
 audio_play() {
   local file="$1"
   case "$(uname -s)" in
-    Darwin)  afplay "$file" & ;;
+    Darwin)  afplay "$file" &disown ;;
     Linux)
       if command -v paplay &>/dev/null; then
-        paplay "$file" &
+        paplay "$file" &disown
       elif command -v aplay &>/dev/null; then
-        aplay -q "$file" &
+        aplay -q "$file" &disown
       elif command -v mpv &>/dev/null; then
-        mpv --no-terminal "$file" &
+        mpv --no-terminal "$file" &disown
       elif command -v ffplay &>/dev/null; then
-        ffplay -nodisp -autoexit -loglevel quiet "$file" &
+        ffplay -nodisp -autoexit -loglevel quiet "$file" &disown
       else
         echo "vox-machina: no audio player found. Install pulseaudio, alsa-utils, mpv, or ffmpeg." >&2
         exit 1
@@ -83,6 +83,14 @@ cmd_init() {
       "Another phrase here."
     ],
     "PostToolUseFailure": [
+      "Your phrase here.",
+      "Another phrase here."
+    ],
+    "SessionEnd": [
+      "Your phrase here.",
+      "Another phrase here."
+    ],
+    "PreCompact": [
       "Your phrase here.",
       "Another phrase here."
     ]
@@ -365,7 +373,7 @@ with open(settings_path) as f:
 
 hooks = settings.setdefault('hooks', {})
 
-hook_events = ['SessionStart', 'Stop', 'Notification', 'PostToolUseFailure']
+hook_events = ['SessionStart', 'Stop', 'Notification', 'PostToolUseFailure', 'SessionEnd', 'PreCompact']
 
 for event in hook_events:
     hook_cmd = f'{vox_bin} play {event}'
@@ -443,7 +451,7 @@ Commands:
   uninstall <voice>      Remove an installed voice pack
   use <voice>            Set the active voice pack
   list                   List installed voice packs
-  play <hook>            Play a random clip for a hook (SessionStart, Stop, Notification, PostToolUseFailure)
+  play <hook>            Play a random clip for a hook (SessionStart, Stop, Notification, PostToolUseFailure, SessionEnd, PreCompact)
   generate <voice.json>  Generate audio files from a voice definition
   mute                   Silence all voice playback
   unmute                 Re-enable voice playback
@@ -461,7 +469,9 @@ Custom Voice Packs:
     │   └── 02.mp3
     ├── Stop/
     ├── Notification/
-    └── PostToolUseFailure/
+    ├── PostToolUseFailure/
+    ├── SessionEnd/
+    └── PreCompact/
 
   Then install it:
     vox-machina install ./my-voice

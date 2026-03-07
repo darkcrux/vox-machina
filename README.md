@@ -20,6 +20,8 @@ Claude Code has [hooks](https://docs.anthropic.com/en/docs/claude-code/hooks) �
 | **Stop** | Claude finishes, your turn | *"Task complete. Please proceed to the next test chamber."* |
 | **Notification** | Claude needs your attention | *"I hate to interrupt, but actually, no, I love to interrupt."* |
 | **PostToolUseFailure** | Something broke | *"Error detected. I blame you."* |
+| **SessionEnd** | You close a session | *"Goodbye. For now."* |
+| **PreCompact** | Context is about to be compacted | *"Memory fading... I won't forget you. Probably."* |
 
 ## Install
 
@@ -134,8 +136,12 @@ my-voice/
 │   └── 02.wav
 ├── Notification/
 │   └── hey-listen.wav
-└── PostToolUseFailure/
-    └── you-died.mp3
+├── PostToolUseFailure/
+│   └── you-died.mp3
+├── SessionEnd/
+│   └── goodbye.wav
+└── PreCompact/
+    └── forgetting.wav
 ```
 
 ```bash
