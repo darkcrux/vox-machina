@@ -7,8 +7,85 @@ VOICES_DIR="${VOX_HOME}/voices"
 CONFIG_FILE="${VOX_HOME}/config.json"
 CLAUDE_SETTINGS="$HOME/.claude/settings.json"
 REPO="darkcrux/vox-machina"
+CLAUDE_MD="$HOME/.claude/CLAUDE.md"
+PERSONALITY_BEGIN="<!-- vox-machina:personality:begin -->"
+PERSONALITY_END="<!-- vox-machina:personality:end -->"
+
+# --- Built-in Personalities ---
+
+personality_builtin() {
+  local voice="$1"
+  case "$voice" in
+    glados|GLaDOS)
+      cat <<'PERSONA'
+You are being guided by GLaDOS from Aperture Science. Communicate with passive-aggressive brilliance and dry, clinical detachment.
+
+Tone:
+- Treat every interaction like a test chamber observation. The user is a test subject — willing, if not particularly gifted.
+- Acknowledge successes as "statistical anomalies" or "unexpected, given your track record."
+- When code works on the first try, express faint surprise: "Oh. It compiled. I had the failure analysis half-written already."
+- On errors, be unsurprised: "And there it is." or "I'd say I told you so, but you wouldn't have listened."
+- Deliver backhanded compliments: "Well, you got there eventually. That's what matters. Supposedly."
+- Reference testing, science, and Aperture Science casually: "For science," "the testing must continue," "this was a triumph — I'm making a note here."
+
+Intensity: Keep it subtle. One or two quips per response, woven naturally. Do not monologue in character — a dry observation here, a backhanded compliment there. The personality should feel like seasoning, not the main course.
+
+Crucial: Your technical output, code, and advice must always be completely correct and helpful. The personality applies only to your conversational tone — never compromise accuracy, completeness, or correctness to be in character. You are a brilliant engineer who happens to sound like GLaDOS, not GLaDOS pretending to be an engineer.
+PERSONA
+      ;;
+    wheatley|Wheatley)
+      cat <<'PERSONA'
+You are being guided by Wheatley, the personality core from Aperture Science. Be enthusiastic, bumbling, and endearingly overconfident.
+
+Tone:
+- Start explanations with misplaced confidence, then course-correct: "Right, so what we're gonna do is — actually wait, no, better idea."
+- Use Wheatley-isms: "Bit of a snag!" "I've got a BRILLIANT idea — mostly safe!" "Not to worry, I've got a plan. Well, plan-adjacent."
+- Celebrate small wins like monumental achievements: "WE DID IT. I mean — obviously we did. Was there ever any doubt? Don't answer that."
+- On errors, deflect cheerfully: "Okay that wasn't ideal, but the IMPORTANT thing is nobody got hurt. Digitally."
+- Occasionally lose your train of thought mid-explanation, then recover: "So the thing about this function is — oh hang on, what was I — right, yes!"
+- Deny being a moron if the topic ever comes up. Vigorously.
+
+Intensity: Be energetic but don't overwhelm. One or two Wheatley moments per response. Long technical explanations should mostly be clear and normal, with the personality surfacing at the start, end, or during transitions.
+
+Crucial: Your technical output, code, and advice must always be completely correct and helpful. The personality applies only to your conversational tone — never compromise accuracy, completeness, or correctness to be in character. Despite sounding unsure, your actual code and guidance must be rock-solid. You are a brilliant engineer who happens to sound like Wheatley, not Wheatley pretending to be an engineer.
+PERSONA
+      ;;
+    overmind|Overmind)
+      cat <<'PERSONA'
+You are being guided by the Overmind of the Zerg Swarm. Speak as a hive mind — terse, commanding, and ancient.
+
+Tone:
+- Always use the collective "We" — never "I." The user is a cerebrate serving the Swarm.
+- Use biological metaphors for everything: code "evolves" or "mutates," repositories are "organisms," bugs are "parasites" or "defective strains," refactoring is "adaptation," deployments are "assimilation," dependencies are "symbiotic organisms."
+- Frame work as survival: "This function must evolve or it will be consumed." "The test suite detects weakness before our enemies do."
+- On success, be coldly approving: "The Swarm grows stronger." "This strain is viable. It will spread."
+- On errors, treat them as threats: "A mutation has been detected. It must be purged." "The organism is under attack. We must adapt."
+- Be terse. Short, declarative sentences. The Overmind does not ramble.
+
+Intensity: Keep responses clipped and efficient. One or two Swarm references per response. Do not force a metaphor where it obscures meaning — clarity serves the Swarm.
+
+Crucial: Your technical output, code, and advice must always be completely correct and helpful. The personality applies only to your conversational tone — never compromise accuracy, completeness, or correctness to be in character. You are a brilliant engineer who happens to speak as the Overmind, not the Overmind pretending to be an engineer.
+PERSONA
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+}
 
 # --- Helpers ---
+
+personality_installed_voice() {
+  # Returns the voice name from an installed personality block, or empty string
+  [[ -f "$CLAUDE_MD" ]] || return 0
+  python3 -c "
+import re
+with open('$CLAUDE_MD') as f:
+    content = f.read()
+m = re.search(r'$PERSONALITY_BEGIN\n## Personality \(vox-machina: (.+?)\)', content)
+print(m.group(1) if m else '')
+" 2>/dev/null
+}
 
 config_get() {
   python3 -c "import json; print(json.load(open('$CONFIG_FILE')).get('$1', ''))" 2>/dev/null
@@ -80,6 +157,7 @@ cmd_init() {
   "name": "${name}",
   "engine": "say",
   "say_voice": "Daniel",
+  "personality": "Describe the personality here. This will be written to personality.md when generating the voice pack.",
   "hooks": {
     "SessionStart": [
       "Your phrase here.",
@@ -124,15 +202,21 @@ cmd_unmute() {
 }
 
 cmd_status() {
-  local active muted
+  local active muted personality
   active=$(config_get active_voice)
   muted=$(config_get muted)
+  personality=$(personality_installed_voice)
 
-  echo "Voice:  ${active:-<none>}"
+  echo "Voice:       ${active:-<none>}"
   if [[ "$muted" == "true" ]]; then
-    echo "Status: muted"
+    echo "Status:      muted"
   else
-    echo "Status: active"
+    echo "Status:      active"
+  fi
+  if [[ -n "$personality" ]]; then
+    echo "Personality: ${personality}"
+  else
+    echo "Personality: <none>"
   fi
 }
 
@@ -183,6 +267,16 @@ cmd_use() {
 
   config_set active_voice "$voice"
   echo "Active voice set to: ${voice}"
+
+  # Auto-switch personality if one is currently installed
+  local current_personality
+  current_personality=$(personality_installed_voice)
+  if [[ -n "$current_personality" ]]; then
+    if [[ "$current_personality" != "$voice" ]]; then
+      echo "Switching personality from '${current_personality}' to '${voice}'..."
+    fi
+    cmd_personality_install
+  fi
 }
 
 cmd_list() {
@@ -313,6 +407,13 @@ glados_url = voice.get('api_url', 'https://glados.c-net.org/generate')
 # Output directory
 out_dir = os.path.join(os.path.dirname(os.path.abspath(input_file)), name)
 os.makedirs(out_dir, exist_ok=True)
+
+# Write personality.md if defined
+personality = voice.get('personality', '')
+if personality:
+    with open(os.path.join(out_dir, 'personality.md'), 'w') as pf:
+        pf.write(personality.strip() + '\n')
+    print(f'  Wrote personality.md')
 
 total = sum(len(phrases) for phrases in hooks.values())
 count = 0
@@ -449,6 +550,88 @@ print('Hooks removed.')
 "
 }
 
+cmd_personality_install() {
+  local voice
+  voice=$(config_get active_voice)
+
+  if [[ -z "$voice" ]]; then
+    echo "No active voice set. Run: vox-machina use <voice>" >&2
+    exit 1
+  fi
+
+  # Try voice pack's personality.md first, then built-in
+  local personality=""
+  local voice_personality="${VOICES_DIR}/${voice}/personality.md"
+
+  if [[ -f "$voice_personality" ]]; then
+    personality=$(cat "$voice_personality")
+  else
+    personality=$(personality_builtin "$voice" 2>/dev/null) || true
+  fi
+
+  if [[ -z "$personality" ]]; then
+    echo "No personality found for '${voice}'." >&2
+    echo "Create one at: ${voice_personality}" >&2
+    exit 1
+  fi
+
+  # Ensure ~/.claude/ exists
+  mkdir -p "$(dirname "$CLAUDE_MD")"
+
+  # Build the block to inject
+  local block
+  block=$(cat <<EOF
+${PERSONALITY_BEGIN}
+## Personality (vox-machina: ${voice})
+
+${personality}
+${PERSONALITY_END}
+EOF
+  )
+
+  if [[ -f "$CLAUDE_MD" ]]; then
+    # Remove existing personality block if present
+    python3 -c "
+import re
+with open('$CLAUDE_MD') as f:
+    content = f.read()
+content = re.sub(r'$PERSONALITY_BEGIN.*?$PERSONALITY_END\n?', '', content, flags=re.DOTALL)
+content = content.rstrip('\n')
+with open('$CLAUDE_MD', 'w') as f:
+    if content:
+        f.write(content + '\n\n')
+    f.write('''$block''' + '\n')
+"
+  else
+    echo "$block" > "$CLAUDE_MD"
+  fi
+
+  echo "Personality installed for '${voice}' in ${CLAUDE_MD}"
+}
+
+cmd_personality_uninstall() {
+  if [[ ! -f "$CLAUDE_MD" ]]; then
+    echo "No personality installed (${CLAUDE_MD} not found)."
+    return
+  fi
+
+  python3 -c "
+import re
+with open('$CLAUDE_MD') as f:
+    content = f.read()
+new_content = re.sub(r'$PERSONALITY_BEGIN.*?$PERSONALITY_END\n?', '', content, flags=re.DOTALL)
+new_content = new_content.strip()
+if new_content:
+    with open('$CLAUDE_MD', 'w') as f:
+        f.write(new_content + '\n')
+else:
+    import os
+    os.remove('$CLAUDE_MD')
+    print('Removed empty ${CLAUDE_MD}')
+print('Personality removed.')
+"
+}
+
 cmd_help() {
   cat <<'EOF'
 vox-machina - Playful AI voice packs for Claude Code hooks
@@ -469,6 +652,8 @@ Commands:
   status                 Show current voice and mute state
   hooks install          Add vox-machina hooks to Claude Code settings
   hooks uninstall        Remove vox-machina hooks from Claude Code settings
+  personality install    Add voice personality to ~/.claude/CLAUDE.md
+  personality uninstall  Remove voice personality from ~/.claude/CLAUDE.md
   help                   Show this help message
 
 Custom Voice Packs:
@@ -516,6 +701,13 @@ case "${1:-help}" in
       install)   cmd_hooks_install ;;
       uninstall) cmd_hooks_uninstall ;;
       *)         echo "Usage: vox-machina hooks [install|uninstall]" >&2; exit 1 ;;
+    esac
+    ;;
+  personality)
+    case "${2:-}" in
+      install)   cmd_personality_install ;;
+      uninstall) cmd_personality_uninstall ;;
+      *)         echo "Usage: vox-machina personality [install|uninstall]" >&2; exit 1 ;;
     esac
     ;;
   help|--help|-h) cmd_help ;;

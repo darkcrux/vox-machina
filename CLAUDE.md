@@ -13,6 +13,7 @@ vox-machina is a single-file Bash CLI (`vox-machina.sh`) that plays random audio
 - **Voice packs** — Directories of audio files organized as `<voice>/<HookName>/*.{wav,aiff,mp3}`. Distributed as zip files via GitHub Releases. Stored at `~/.vox-machina/voices/`.
 - **Config** — `~/.vox-machina/config.json` stores `active_voice` and `muted` state. Read/written via `config_get`/`config_set` helpers.
 - **Hooks integration** — `cmd_hooks_install` injects `vox-machina play <event>` commands into `~/.claude/settings.json`.
+- **Personality system** — `cmd_personality_install` writes a voice-themed personality prompt into `~/.claude/CLAUDE.md` (wrapped in HTML comment markers for clean replacement). Built-in personalities exist for GLaDOS, Wheatley, and Overmind. Voice packs can bundle a custom `personality.md` file.
 
 ## Key Details
 

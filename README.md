@@ -56,6 +56,21 @@ vox-machina use glados        # For science
 vox-machina use wheatley      # For chaos
 ```
 
+## Personality mode
+
+Voice packs don't just sound different — they can make Claude *talk* different. Personality mode injects a voice-themed prompt into `~/.claude/CLAUDE.md` so Claude's text responses match the voice.
+
+```bash
+vox-machina personality install    # Activate personality for current voice
+vox-machina personality uninstall  # Back to normal Claude
+```
+
+GLaDOS will be passive-aggressive about your code. Wheatley will enthusiastically panic. The Overmind will refer to your codebase as a living organism.
+
+> **Your code stays correct.** Personality only affects conversational tone — Claude's technical output, advice, and generated code are never compromised.
+
+Custom voice packs can include a `personality.md` file to define their own personality prompt.
+
 ## Too much? Too little?
 
 ```bash
@@ -79,6 +94,8 @@ vox-machina unmute                 Re-enable playback
 vox-machina status                 Show current voice and mute state
 vox-machina hooks install          Add hooks to Claude Code
 vox-machina hooks uninstall        Remove hooks from Claude Code
+vox-machina personality install    Add voice personality to Claude
+vox-machina personality uninstall  Remove voice personality from Claude
 ```
 
 ## Make your own voice pack
@@ -100,7 +117,7 @@ vox-machina install ./jarvis
 vox-machina use jarvis
 ```
 
-The template gives you all four hooks with placeholder phrases. Fill in what you want, delete what you don't — missing hooks are silently skipped.
+The template gives you all hooks with placeholder phrases. Fill in what you want, delete what you don't — missing hooks are silently skipped. Add a `"personality"` field to your JSON to define how Claude should talk when your voice pack is active — it gets written as `personality.md` in the generated output.
 
 #### TTS engines
 
@@ -129,6 +146,7 @@ Drop audio files into folders named after hooks:
 
 ```
 my-voice/
+├── personality.md          # Optional: Claude's personality prompt
 ├── SessionStart/
 │   └── hello-there.mp3
 ├── Stop/
