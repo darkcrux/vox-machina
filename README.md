@@ -47,6 +47,7 @@ vox-machina play Stop         # Test it. You've earned it.
 | `glados` | Passive-aggressive AI from Portal. Will question your life choices. |
 | `overmind` | Zerg Swarm commander from StarCraft. You are the cerebrate now. |
 | `wheatley` | Bumbling personality core from Portal 2. Sixty percent ready. |
+| `gandalf` | Wandering wizard of Middle-earth. Will tell your pushes they shall not pass. |
 
 Switch anytime:
 
