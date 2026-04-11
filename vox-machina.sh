@@ -2,7 +2,7 @@
 # vox-machina: Playful AI voice packs for Claude Code hooks
 set -euo pipefail
 
-VERSION="0.2.0"
+VERSION="0.4.0"
 
 VOX_HOME="${VOX_MACHINA_HOME:-$HOME/.vox-machina}"
 VOICES_DIR="${VOX_HOME}/voices"
